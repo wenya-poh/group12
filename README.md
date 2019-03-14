@@ -1,4 +1,4 @@
-GROUP 12 README FILE
+# GROUP 12 
 
 Members
 - Darren Lionel Chan
