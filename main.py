@@ -6,13 +6,18 @@ Created on Tue Apr  2 16:35:30 2019
 @author: wenya, darren
 """
 
-# Make list of all lyric text titles
+#1 Make list of all lyric text titles
 import os, sys
 
-# Change working directory to the folder CONTAINING "lyrics" here - gives list of names of each file
+## Change working directory to the folder CONTAINING "lyrics" here - gives list of names of each file
 path = "lyrics"
 dirs = os.listdir(path)
-file_titles = []
+file_titles = [] # list of file titles without .txt
+file_txt_names = [] #list of tile titles with .txt
+
+for file in dirs:
+    file_txt_names.append(file)
+file_txt_names.sort()
 
 for file in dirs:
    file_titles.append(file)
@@ -21,25 +26,23 @@ for i in range(len(file_titles)):
     file_titles[i] = file_titles[i].replace(".txt","")
     
 
-#extract id, artist, title
-list_1 = []
+#2 Create output (extract id, artist, title)
     
-def extract_(x):
-    
-    import re
-    for i in range(1000):
-        b = re.split('~' ,x[i])   
+def extract_(titles):
+    list_1 = []
+    for i in titles:
+        b = i.split('~')   
         dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': 0, 'love': 0, 'mood': 0, 'length': 0, 'complexity': 0}
         list_1.append(dict_1)
     return list_1
     
-extract_(file_titles)
+output_list = extract_(file_titles)
 
 
-file_titles.sort()
 
-
+#3 Create the main lyric dictionary with id: [list of song words]
 def read_song(txt_name):
+    # returns all words for 1 song
     textfile = open(str(txt_name))
     raw_lines = []
     song_words = []
@@ -47,31 +50,32 @@ def read_song(txt_name):
     for i in textfile:
         raw_lines.append(i.split())
     
-    for line in raw_words:
+    for line in raw_lines:
         if line != []:
             for word in line:
                 song_words.append(word)
     return song_words
 
-# Change working directory INTO the lyrics folder before running this
-## List of all IDs   
-song_ID = []
-for i in file_titles:
-    song_ID.append(i[0:3])
-song_ID.sort()
+## Get List of all IDs, sorted from 000 to 10000 
+def song_ID_list(titles):
+    song_ID = []
+    for i in titles:
+        j = i.split('~')
+        song_ID.append(j[0])
+    return song_ID
 
-
+song_ID_sorted = song_ID_list(file_titles)
+song_ID_sorted.sort()
+ 
+## Ensure that file_txt_names was mined from the fist set of code on top first. 
+## Change working directory INTO the lyrics folder before running the next few lines
 lyric_dict = {}
 n=0
-file_titles.sort()
-while n<=1001:
-    lyric_dict[song_ID[n]] = read_song(file_titles[n])
+while n<=1000:
+    lyric_dict[song_ID_sorted[n]] = read_song(file_txt_names[n])
     n+=1
 
 
-
-for i in file_titles:
-    song = read_song(i)
     
     
     
