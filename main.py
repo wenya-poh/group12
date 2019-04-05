@@ -28,8 +28,6 @@ for i in range(len(file_titles)):
 
 
 
-
-
 #3 Create the main lyric dictionary with id: [list of song words]
 def read_song(txt_name):
     # returns all words for 1 song
@@ -64,6 +62,15 @@ n=0
 while n<=1000:
     lyric_dict[song_ID_sorted[n]] = read_song(file_txt_names[n])
     n+=1
+    
+
+#### Generic Functions for scoring:
+
+#Generic scaling function. Returns one scaled value from 0-1.
+def scaler(max_,min_,value):
+    
+    x =((1-0)/(max_-min_)*(value-max_)+1) 
+    return x 
 
 #CODE FOR SONG LENGTH
 
@@ -73,32 +80,90 @@ n = 0
 while n<=1000:
     song_length_list.append(len(lyric_dict[song_ID_sorted[n]]))
     n+=1
-max_ = max(song_length_list)
-min_ = min(song_length_list)
+
 
 #create dictionary consisting id, song length
 length_dict = {}
-
 n = 0
 while n<=1000:
-    length_dict[song_ID_sorted[n]] = ((1-0)/(max_-min_)*(len(lyric_dict[song_ID_sorted[n]])-max_)+1)    
-    n+=1
+    length_dict[song_ID_sorted[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict[song_ID_sorted[n]]))
+    n +=1
+ 
+
+# CODE FOR COMPLEXITY
+
+
+##### Make lyrics_dict_lower
+
+lyrics_list_lower = []
+
+for i in range(len(lyric_dict)):
+    song_list_lower = [] 
+    for j in range(len(lyric_dict[song_ID_sorted[i]])):
+        song_list_lower.append(lyric_dict[song_ID_sorted[i]][j].lower())
     
+    lyrics_list_lower.append(song_list_lower)
+    
+lyric_dict_lower = {}
+n=0
+while n<=1000:
+    lyric_dict_lower[song_ID_sorted[n]] = lyrics_list_lower[n]
+    n+=1
+
+##### Remove stop words
+import nltk
+from nltk.corpus import stopwords
 
 
+example_sent = "This is a sample sentence, showing off the stop words filtration."
+  
+stop_words = set(stopwords.words('english')) 
+
+simple_lyrics_list = []
+
+for i in range(len(lyric_dict)):
+    
+    filtered_sentence = [] 
+    
+    filtered_sentence = [w for w in lyric_dict_lower[song_ID_sorted[i]] if not w in stop_words] 
+  
+    for w in lyric_dict_lower[song_ID_sorted[i]]: 
+        if w not in stop_words: 
+          filtered_sentence.append(w)
+    simple_lyrics_list.append(filtered_sentence)
+    
+## Obtain count of words as proxy for complexity
+simple_lyrics_count = []
+        
+for i in range(len(simple_lyrics_list)):
+
+    x = len(set(simple_lyrics_list[i]))
+    simple_lyrics_count.append(x)
+
+## Scale simple word count to 0-1 for complexity
+complexity_dict = {}
+n = 0
+while n<=1000:
+    complexity_dict[song_ID_sorted[n]] = scaler(max(simple_lyrics_count), min(simple_lyrics_count),simple_lyrics_count[n])
+    n +=1   
+    
+lyric_dict["417"]
+    
 ## Notes
 # Lyric filenames go from 000 to 1000
 # .splitlines() to get each line in a nested list
-    
-    
-    
+
+x = "000~Jerry-Harrison~No-More-Reruns.txt"
+open(str(x),encoding="utf8")
+read_song(file_txt_names[0])
+   
 #5 ALWAYS RUN LAST! Create final output dictionary(extract id, artist, title) 
     
 def extract_(titles):
     list_1 = []
     for i in titles:
         b = i.split('~')   
-        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': 0, 'love': 0, 'mood': 0, 'length': length_dict[b[0]], 'complexity': 0}
+        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': 0, 'love': 0, 'mood': 0, 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
         list_1.append(dict_1)
     return list_1
     
