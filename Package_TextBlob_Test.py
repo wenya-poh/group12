@@ -36,6 +36,13 @@ w3.sentiment
 w4 = TextBlob("she's such an idiot, why do you trust her?")
 w4.sentiment
 
+w5 = TextBlob("They get tired of you and they're gonna put you down (put you down, put you down)")
+w5.sentiment
+
+w6 = TextBlob("In fact there's no other girl in this whole wide world who can love you like I do")
+w6.sentiment
+
+
 # Test language detection and translation
 s152 = TextBlob("Tomame en tus brazos,embriagame de amor")
 s152.detect_language()
@@ -80,3 +87,6 @@ sen.detect_language()
 
                 if len(word) >= 3 and TextBlob(word).detect_language() != 'en':
                     TextBlob(word).translate(to='en')    
+                    
+            #if TextBlob(line).detect_language() != 'en':
+                #line = str(TextBlob(line).translate(to='en'))

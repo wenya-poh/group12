@@ -27,22 +27,7 @@ for i in range(len(file_titles)):
     file_titles[i] = file_titles[i].replace(".txt","")
 
 
-
-# Function to return a list of songs with each line as a string
-def read_song_lines(txt_name):
-    # returns the first line of each song
-    textfile = open(str(txt_name),encoding="utf8")
-    raw_lines = []
-    for i in textfile:
-        raw_lines.append(i.split())
-    return raw_lines
-
-# Run through all files and capture the 
-foreign_song_ID = []
-
-
-
-#3 Create the main lyric dictionary with id: [list of song words]
+# Function that returns the individual words for the text file input
 def read_song(txt_name):
     # returns all words for 1 song
     textfile = open(str(txt_name),encoding="utf8")
@@ -53,11 +38,7 @@ def read_song(txt_name):
         raw_lines.append(i.split())
     
     for line in raw_lines:
-        if line != []:
-            
-            #if TextBlob(line).detect_language() != 'en':
-                #line = str(TextBlob(line).translate(to='en'))
-            
+        if line != []:            
             for word in line:
                 song_words.append(word)
     return song_words
@@ -73,6 +54,8 @@ def song_ID_list(titles):
 song_ID_sorted = song_ID_list(file_titles)
 song_ID_sorted.sort()
  
+
+# Create the main lyric dictionary with individual words. format is id: [list of song words]
 ## Ensure that file_txt_names was mined from the fist set of code on top first. 
 ## Change working directory INTO the lyrics folder before running the next few lines
 lyric_dict = {}
@@ -90,6 +73,24 @@ for i in range(len(lyric_dict)):
         song_list_lower.append(lyric_dict[song_ID_sorted[i]][j].lower())
     
     lyrics_list_lower.append(song_list_lower)    
+
+
+# Create the main line dictionary with sentences. format is id: [list of lyric sentences]
+## Function to return a list of songs with each line as a string
+def read_song_lines(txt_name):
+    # returns the first line of each song
+    textfile = open(str(txt_name),encoding="utf8")
+    raw_lines = []
+    for i in textfile:
+        raw_lines.append(i.strip('\n').rstrip())
+    return raw_lines
+## Ensure that file_txt_names was mined from the fist set of code on top first. 
+## Change working directory INTO the lyrics folder before running the next few lines
+lines_dict = {}
+n=0
+while n<=1000:
+    lines_dict[song_ID_sorted[n]] = read_song_lines(file_txt_names[n])
+    n+=1
 
     
 # Language
@@ -205,6 +206,8 @@ while n<=1000:
    
 
 # CODE FOR MOOD
+## Use TextBlob's sentiment to check polarity - positive or negative.
+## Needs to detect sentence by sentence, not by individual words
 from textblob import TextBlob
 
 
