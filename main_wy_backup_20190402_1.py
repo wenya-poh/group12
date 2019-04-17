@@ -96,3 +96,24 @@ for i in file_titles:
 ## Notes
 # Lyric filenames go from 000 to 1000
 # .splitlines() to get each line in a nested list
+    
+
+## Doesn't work because it calls GoogleTranslate API too many times
+#3 Create the main lyric dictionary with id: [list of song words]
+def read_song(txt_name):
+    # returns all words for 1 song
+    textfile = open(str(txt_name),encoding="utf8")
+    raw_lines = []
+    song_words = []
+    
+    for i in textfile:
+        # Additional code to handle lines that are not in english, translate to english
+        if TextBlob(i).detect_language() != 'en':
+            i = TextBlob(i).translate(to='en') 
+        raw_lines.append(str(i).split())
+    
+    for line in raw_lines:
+        if line != []:
+            for word in line:
+                song_words.append(word)
+    return song_words

@@ -8,6 +8,7 @@ Created on Tue Apr  2 16:35:30 2019
 
 #1 Make list of all lyric text titles
 import os, sys
+from textblob import TextBlob
 
 ## Change working directory to the folder CONTAINING "lyrics" here - gives list of names of each file
 path = "lyrics"
@@ -24,7 +25,20 @@ for file in dirs:
 
 for i in range(len(file_titles)):
     file_titles[i] = file_titles[i].replace(".txt","")
-    
+
+
+
+# Function to return a list of songs with each line as a string
+def read_song_lines(txt_name):
+    # returns the first line of each song
+    textfile = open(str(txt_name),encoding="utf8")
+    raw_lines = []
+    for i in textfile:
+        raw_lines.append(i.split())
+    return raw_lines
+
+# Run through all files and capture the 
+foreign_song_ID = []
 
 
 
@@ -40,6 +54,10 @@ def read_song(txt_name):
     
     for line in raw_lines:
         if line != []:
+            
+            #if TextBlob(line).detect_language() != 'en':
+                #line = str(TextBlob(line).translate(to='en'))
+            
             for word in line:
                 song_words.append(word)
     return song_words
@@ -72,9 +90,14 @@ for i in range(len(lyric_dict)):
         song_list_lower.append(lyric_dict[song_ID_sorted[i]][j].lower())
     
     lyrics_list_lower.append(song_list_lower)    
+
     
-#Language Detection and Remove Songs UNDONE
-from langdetect import detect
+# Language
+## Install TextBlob package. https://github.com/sloria/textblob , https://textblob.readthedocs.io/en/dev/quickstart.html#create-a-textblob
+## In Termianl type (1) "pip install -U textblob", then (2) "python -m textblob.download_corpora"
+## Classes: https://textblob.readthedocs.io/en/dev/api_reference.html#textblob.blob.TextBlob.tags
+from textblob import TextBlob
+
   
 
 #### Generic Functions for scoring:
@@ -177,16 +200,20 @@ while n<=1000:
     complexity_dict[song_ID_sorted[n]] = scaler(max(simple_lyrics_count), min(simple_lyrics_count),simple_lyrics_count[n])
     n +=1   
     
-lyric_dict["417"]
-    
-## Notes
-# Lyric filenames go from 000 to 1000
-# .splitlines() to get each line in a nested list
 
-x = "000~Jerry-Harrison~No-More-Reruns.txt"
-open(str(x),encoding="utf8")
-read_song(file_txt_names[0])
+
    
+
+# CODE FOR MOOD
+from textblob import TextBlob
+
+
+
+
+# CODE FOR LOVE
+
+
+
 #5 ALWAYS RUN LAST! Create final output dictionary(extract id, artist, title) 
     
 def extract_(titles):
@@ -200,3 +227,8 @@ def extract_(titles):
 output_list = extract_(file_titles)
 
 output_list[1] 
+
+
+## Notes
+# Lyric filenames go from 000 to 1000
+# .splitlines() to get each line in a nested list
