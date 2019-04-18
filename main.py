@@ -106,17 +106,35 @@ for key, value in lines_dict.items():
         x = TextBlob(value[0]).detect_language()
         if x != 'en':
             non_eng_record[key] = x 
-non_eng_record
+### non_eng_record dictionary is saved in non_eng_record_dict.py for backup record, because GoogleTranslate API may not always be available 
+
+## Obtain list of all indexes that are not in English
+non_eng_indexes = []
+for key,value in non_eng_record.items():
+    non_eng_indexes.append(key)
+
+## translate_list iterates over a list of strings and translates them using TextBlob
+def translate_list(list_):
+    from textblob import TextBlob
+    translated = []
+    for i in list_:
+        t = TextBlob(str(i)).translate(to='en')
+        translated.append(str(t))
+    return translated
     
-  
+lines_dict_trans = lines_dict
+for index in non_eng_indexes:
+    lines_dict_trans[index] = translate_list(lines_dict[index])
+###WENYA: WORK INPROGRESS. API stops working after the first paragraph of the first song is translated, see the non_eng_record_dict.py
 
-#### Generic Functions for scoring:
 
-#Generic scaling function. Returns one scaled value from 0-1.
+# Generic Functions for scoring:
+## Generic scaling function. Returns one scaled value from 0-1.
 def scaler(max_,min_,value):
     
     x =((1-0)/(max_-min_)*(value-max_)+1) 
     return x 
+
 
 #CODE FOR SONG LENGTH
 
