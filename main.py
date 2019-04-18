@@ -8,10 +8,16 @@ Created on Tue Apr  2 16:35:30 2019
 
 #1 Make list of all lyric text titles
 import os, sys
+
+# Language
+## Install TextBlob package. https://github.com/sloria/textblob , https://textblob.readthedocs.io/en/dev/quickstart.html#create-a-textblob
+## In Termianl type (1) "pip install -U textblob", then (2) "python -m textblob.download_corpora"
+## Classes: https://textblob.readthedocs.io/en/dev/api_reference.html#textblob.blob.TextBlob.tags
 from textblob import TextBlob
 
+
 ## Change working directory to the folder CONTAINING "lyrics" here - gives list of names of each file
-path = "lyrics"
+path = "lyrics" ##NOTE: Prof says we will need to use an argparse thing instead of absolute path
 dirs = os.listdir(path)
 file_titles = [] # list of file titles without .txt
 file_txt_names = [] #list of tile titles with .txt
@@ -40,7 +46,7 @@ def read_song(txt_name):
     for line in raw_lines:
         if line != []:            
             for word in line:
-                song_words.append(word)
+                song_words.append(word.lower())
     return song_words
 
 ## Get List of all IDs, sorted from 000 to 10000 
@@ -82,7 +88,7 @@ def read_song_lines(txt_name):
     textfile = open(str(txt_name),encoding="utf8")
     raw_lines = []
     for i in textfile:
-        raw_lines.append(i.strip('\n').rstrip())
+        raw_lines.append(i.strip('\n').rstrip().lower())
     return raw_lines
 ## Ensure that file_txt_names was mined from the fist set of code on top first. 
 ## Change working directory INTO the lyrics folder before running the next few lines
@@ -92,13 +98,16 @@ while n<=1000:
     lines_dict[song_ID_sorted[n]] = read_song_lines(file_txt_names[n])
     n+=1
 
-    
-# Language
-## Install TextBlob package. https://github.com/sloria/textblob , https://textblob.readthedocs.io/en/dev/quickstart.html#create-a-textblob
-## In Termianl type (1) "pip install -U textblob", then (2) "python -m textblob.download_corpora"
-## Classes: https://textblob.readthedocs.io/en/dev/api_reference.html#textblob.blob.TextBlob.tags
+# Check which songs are not in english
 from textblob import TextBlob
-
+non_eng_record = {}
+for key, value in lines_dict.items():
+    if len(value[0]) >= 3:
+        x = TextBlob(value[0]).detect_language()
+        if x != 'en':
+            non_eng_record[key] = x 
+non_eng_record
+    
   
 
 #### Generic Functions for scoring:
@@ -155,7 +164,6 @@ while n<=1000:
 
 # CODE FOR COMPLEXITY
 
-
 ##### Make lyrics_dict_lower
     
 lyric_dict_lower = {}
@@ -203,13 +211,33 @@ while n<=1000:
     
 
 
-   
-
 # CODE FOR MOOD
 ## Use TextBlob's sentiment to check polarity - positive or negative.
-## Needs to detect sentence by sentence, not by individual words
+## Needs to detect sentence by sentence, not by individual words -> use lines_dict
+## We use textblob's sentiment detector (built on training set of movie reviews) -> Return a tuple of form (polarity, subjectivity ) where polarity is a float within the range [-1.0, 1.0] and subjectivity is a float within the range [0.0, 1.0] where 0.0 is very objective and 1.0 is very subjective.
+## Our Mood score goes from 0 (most negative mood) to 1 (most positive mood)
 from textblob import TextBlob
 
+def detect_song_mood(lines):
+    #input: lines is a list of all sentences in 1 song
+    mood_score_list = []
+    for sentence in lines:
+        scaled_sentiment = scaler(1,-1,TextBlob(sentence).sentiment[0]) #Scale textblob's sentiment output from their scale of 1,-1 to our scale of 1,0
+        mood_score_list.append(scaled_sentiment)
+    mood_score = sum(mood_score_list)/len(mood_score_list)
+    return mood_score
+
+def max_min_mood(lines_dict_):
+    # input: dictionary of all the lines of songs
+    all_mode_scores = []
+    for key,value in lines_dict_.items():
+        all_mode_scores.append(detect_song_mood(value))
+    return(max(all_mode_scores),min(all_mode_scores))
+maxmin_mood_score = max_min_mood(lines_dict)
+
+mood_dict = {}
+for key,value in lines_dict.items():
+    mood_dict[key] = scaler(maxmin_mood_score[0],maxmin_mood_score[1],detect_song_mood(value))
 
 
 
@@ -223,13 +251,13 @@ def extract_(titles):
     list_1 = []
     for i in titles:
         b = i.split('~')   
-        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': profanity_dict[b[0]], 'love': 0, 'mood': 0, 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
+        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': profanity_dict[b[0]], 'love': 0, 'mood': mood_dict[b[0]], 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
         list_1.append(dict_1)
     return list_1
     
 output_list = extract_(file_titles)
 
-output_list[1] 
+output_list[983] 
 
 
 ## Notes

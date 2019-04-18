@@ -41,6 +41,7 @@ w5.sentiment
 
 w6 = TextBlob("In fact there's no other girl in this whole wide world who can love you like I do")
 w6.sentiment
+w6.sentiment[0]
 
 
 # Test language detection and translation
@@ -59,6 +60,7 @@ s170.translate(to='en')
 s191 = TextBlob("Sali un dia con mi amigo why su dinero a buscar diversion")
 s191.detect_language()
 s191.translate(to='en')
+x = s191.detect_language()
 
 s256 = TextBlob("Ai Mouraria")
 s256.detect_language()
