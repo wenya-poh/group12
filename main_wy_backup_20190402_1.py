@@ -117,3 +117,45 @@ def read_song(txt_name):
             for word in line:
                 song_words.append(word)
     return song_words
+
+
+#######
+# Backup from 18th April 2019
+## Removed the code that makes lyric_dict_lower because lyric_dict now only has lowercase
+    
+##### Make lyrics_dict_lower
+lyric_dict_lower = {}
+n=0
+while n<=1000:
+    lyric_dict_lower[song_ID_sorted[n]] = lyrics_list_lower[n]
+    n+=1
+
+
+##### Gives the list of love_keywords from our CSV
+love_keywords = []
+love_csv =open('love_keywords.csv',encoding="utf8")
+for i in love_csv:
+    love_keywords.append(i.strip('\n').rstrip().lower())
+    
+with open("love_keywords_list.txt", "w") as output:
+    output.write(str(love_keywords))
+
+
+
+def max_min_love(lyric_dict_):
+    # input is the lyric_dict, where each value is a list of all words in 1 song
+    # contains a loop that uses detct_love_count function to get the value for every song and appends it to all_love_scores, then we find the max and min
+    all_love_scores = []
+    love_scores_dict = {}
+    for key,value in lyric_dict_.items():
+        all_love_scores.append(detect_love_count(value))
+        love_scores_dict[key] = detect_love_count(value)
+    return love_scores_dict
+    #return(max(all_love_scores),min(all_love_scores))
+love_scores_dict = max_min_love(lyric_dict)
+maxmin_love_score = max_min_love(lyric_dict)
+
+love_dict = {}
+for key,value in lyric_dict.items():
+    love_dict[key] = scaler(maxmin_love_score[0],maxmin_love_score[1],detect_love_count(value))
+

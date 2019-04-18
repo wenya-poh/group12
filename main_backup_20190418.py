@@ -4,6 +4,9 @@
 Created on Tue Apr  2 16:35:30 2019
 
 @author: wenya, darren
+
+Backup is done for the file before lyric_dict_lower is removed
+
 """
 
 #1 Make list of all lyric text titles
@@ -113,26 +116,22 @@ non_eng_indexes = []
 for key,value in non_eng_record.items():
     non_eng_indexes.append(key)
 
-# =============================================================================
-# ## translate_list iterates over a list of strings and translates them using TextBlob
-# def translate_list(list_):
-#     from textblob import TextBlob
-#     translated = []
-#     for i in list_:
-#         t = TextBlob(str(i)).translate(to='en')
-#         translated.append(str(t))
-#     return translated
-#     
-# lines_dict_trans = lines_dict
-# for index in non_eng_indexes:
-#     lines_dict_trans[index] = translate_list(lines_dict[index])
-# ###WENYA: WORK INPROGRESS. API stops working after the first paragraph of the first song is translated, see the non_eng_record_dict.py
-# ###gives "Translation API returned and empty response." because there's too many requests
-# 
-# =============================================================================
+## translate_list iterates over a list of strings and translates them using TextBlob
+def translate_list(list_):
+    from textblob import TextBlob
+    translated = []
+    for i in list_:
+        t = TextBlob(str(i)).translate(to='en')
+        translated.append(str(t))
+    return translated
+    
+lines_dict_trans = lines_dict
+for index in non_eng_indexes:
+    lines_dict_trans[index] = translate_list(lines_dict[index])
+###WENYA: WORK INPROGRESS. API stops working after the first paragraph of the first song is translated, see the non_eng_record_dict.py
 
 
-# GENERIC FUNCTIONS FOR SCORING:
+# Generic Functions for scoring:
 ## Generic scaling function. Returns one scaled value from 0-1.
 def scaler(max_,min_,value):
     
@@ -141,12 +140,14 @@ def scaler(max_,min_,value):
 
 
 #CODE FOR SONG LENGTH
+
 #create list of song lengths to find max and min
 song_length_list = []
 n = 0
 while n<=1000:
     song_length_list.append(len(lyric_dict[song_ID_sorted[n]]))
     n+=1
+
 
 #create dictionary consisting id, song length
 length_dict = {}
@@ -158,6 +159,7 @@ while n<=1000:
 
 
 # CODE FOR KID SAFE
+    
 profanity_list = ['4r5e', '5h1t', '5hit', 'a55', 'anal', 'anus', 'ar5e', 'arrse', 'arse', 'ass', 'ass-fucker', 'asses', 'assfucker', 'assfukka', 'asshole', 'assholes', 'asswhole', 'a_s_s', 'b!tch', 'b00bs', 'b17ch', 'b1tch', 'ballbag', 'balls', 'ballsack', 'bastard', 'beastial', 'beastiality', 'bellend', 'bestial', 'bestiality', 'bi+ch', 'biatch', 'bitch', 'bitcher', 'bitchers', 'bitches', 'bitchin', 'bitching', 'bloody', 'blow job', 'blowjob', 'blowjobs', 'boiolas', 'bollock', 'bollok', 'boner', 'boob', 'boobs', 'booobs', 'boooobs', 'booooobs', 'booooooobs', 'breasts', 'buceta', 'bugger', 'bum', 'bunny fucker', 'butt', 'butthole', 'buttmuch', 'buttplug', 'c0ck', 'c0cksucker', 'carpet muncher', 'cawk', 'chink', 'cipa', 'cl1t', 'clit', 'clitoris', 'clits', 'cnut', 'cock', 'cock-sucker', 'cockface', 'cockhead', 'cockmunch', 'cockmuncher', 'cocks', 'cocksuck ', 'cocksucked ', 'cocksucker', 'cocksucking', 'cocksucks ', 'cocksuka', 'cocksukka', 'cok', 'cokmuncher', 'coksucka', 'coon', 'cox', 'crap', 'cum', 'cummer', 'cumming', 'cums', 'cumshot', 'cunilingus', 'cunillingus', 'cunnilingus', 'cunt', 'cuntlick ', 'cuntlicker ', 'cuntlicking ', 'cunts', 'cyalis', 'cyberfuc', 'cyberfuck ', 'cyberfucked ', 'cyberfucker', 'cyberfuckers', 'cyberfucking ', 'd1ck', 'damn', 'dick', 'dickhead', 'dildo', 'dildos', 'dink', 'dinks', 'dirsa', 'dlck', 'dog-fucker', 'doggin', 'dogging', 'donkeyribber', 'doosh', 'duche', 'dyke', 'ejaculate', 'ejaculated', 'ejaculates ', 'ejaculating ', 'ejaculatings', 'ejaculation', 'ejakulate', 'f u c k', 'f u c k e r', 'f4nny', 'fag', 'fagging', 'faggitt', 'faggot', 'faggs', 'fagot', 'fagots', 'fags', 'fanny', 'fannyflaps', 'fannyfucker', 'fanyy', 'fatass', 'fcuk', 'fcuker', 'fcuking', 'feck', 'fecker', 'felching', 'fellate', 'fellatio', 'fingerfuck ', 'fingerfucked ', 'fingerfucker ', 'fingerfuckers', 'fingerfucking ', 'fingerfucks ', 'fistfuck', 'fistfucked ', 'fistfucker ', 'fistfuckers ', 'fistfucking ', 'fistfuckings ', 'fistfucks ', 'flange', 'fook', 'fooker', 'fuck', 'fucka', 'fucked', 'fucker', 'fuckers', 'fuckhead', 'fuckheads', 'fuckin', 'fucking', 'fuckings', 'fuckingshitmotherfucker', 'fuckme ', 'fucks', 'fuckwhit', 'fuckwit', 'fudge packer', 'fudgepacker', 'fuk', 'fuker', 'fukker', 'fukkin', 'fuks', 'fukwhit', 'fukwit', 'fux', 'fux0r', 'f_u_c_k', 'gangbang', 'gangbanged ', 'gangbangs ', 'gaylord', 'gaysex', 'goatse', 'God', 'god-dam', 'god-damned', 'goddamn', 'goddamned', 'hardcoresex ', 'hell', 'heshe', 'hoar', 'hoare', 'hoer', 'homo', 'hore', 'horniest', 'horny', 'hotsex', 'jack-off ', 'jackoff', 'jap', 'jerk-off ', 'jism', 'jiz ', 'jizm ', 'jizz', 'kawk', 'knob', 'knobead', 'knobed', 'knobend', 'knobhead', 'knobjocky', 'knobjokey', 'kock', 'kondum', 'kondums', 'kum', 'kummer', 'kumming', 'kums', 'kunilingus', 'l3i+ch', 'l3itch', 'labia', 'lmfao', 'lust', 'lusting', 'm0f0', 'm0fo', 'm45terbate', 'ma5terb8', 'ma5terbate', 'masochist', 'master-bate', 'masterb8', 'masterbat*', 'masterbat3', 'masterbate', 'masterbation', 'masterbations', 'masturbate', 'mo-fo', 'mof0', 'mofo', 'mothafuck', 'mothafucka', 'mothafuckas', 'mothafuckaz', 'mothafucked ', 'mothafucker', 'mothafuckers', 'mothafuckin', 'mothafucking ', 'mothafuckings', 'mothafucks', 'mother fucker', 'motherfuck', 'motherfucked', 'motherfucker', 'motherfuckers', 'motherfuckin', 'motherfucking', 'motherfuckings', 'motherfuckka', 'motherfucks', 'muff', 'mutha', 'muthafecker', 'muthafuckker', 'muther', 'mutherfucker', 'n1gga', 'n1gger', 'nazi', 'nigg3r', 'nigg4h', 'nigga', 'niggah', 'niggas', 'niggaz', 'nigger', 'niggers ', 'nob', 'nob jokey', 'nobhead', 'nobjocky', 'nobjokey', 'numbnuts', 'nutsack', 'orgasim ', 'orgasims ', 'orgasm', 'orgasms ', 'p0rn', 'pawn', 'pecker', 'penis', 'penisfucker', 'phonesex', 'phuck', 'phuk', 'phuked', 'phuking', 'phukked', 'phukking', 'phuks', 'phuq', 'pigfucker', 'pimpis', 'piss', 'pissed', 'pisser', 'pissers', 'pisses ', 'pissflaps', 'pissin ', 'pissing', 'pissoff ', 'poop', 'porn', 'porno', 'pornography', 'pornos', 'prick', 'pricks ', 'pron', 'pube', 'pusse', 'pussi', 'pussies', 'pussy', 'pussys ', 'rectum', 'retard', 'rimjaw', 'rimming', 's hit', 's.o.b.', 'sadist', 'schlong', 'screwing', 'scroat', 'scrote', 'scrotum', 'semen', 'sex', 'sh!+', 'sh!t', 'sh1t', 'shag', 'shagger', 'shaggin', 'shagging', 'shemale', 'shi+', 'shit', 'shitdick', 'shite', 'shited', 'shitey', 'shitfuck', 'shitfull', 'shithead', 'shiting', 'shitings', 'shits', 'shitted', 'shitter', 'shitters ', 'shitting', 'shittings', 'shitty ', 'skank', 'slut', 'sluts', 'smegma', 'smut', 'snatch', 'son-of-a-bitch', 'spac', 'spunk', 's_h_i_t', 't1tt1e5', 't1tties', 'teets', 'teez', 'testical', 'testicle', 'tit', 'titfuck', 'tits', 'titt', 'tittie5', 'tittiefucker', 'titties', 'tittyfuck', 'tittywank', 'titwank', 'tosser', 'turd', 'tw4t', 'twat', 'twathead', 'twatty', 'twunt', 'twunter', 'v14gra', 'v1gra', 'vagina', 'viagra', 'vulva', 'w00se', 'wang', 'wank', 'wanker', 'wanky', 'whoar', 'whore', 'willies', 'willy', 'xrated', 'xxx']
 
 profanity_count = []
@@ -170,6 +172,7 @@ for i in lyrics_list_lower:
             pass
     profanity_count.append(b)
     
+
 ## Scale simple word count to 0-1 for kid-friendliness
 profanity_dict = {}
 
@@ -181,6 +184,14 @@ while n<=1000:
 
 
 # CODE FOR COMPLEXITY
+
+##### Make lyrics_dict_lower
+lyric_dict_lower = {}
+n=0
+while n<=1000:
+    lyric_dict_lower[song_ID_sorted[n]] = lyrics_list_lower[n]
+    n+=1
+
 ##### Remove stop words
 import nltk
 from nltk.corpus import stopwords
@@ -193,10 +204,12 @@ stop_words = set(stopwords.words('english'))
 simple_lyrics_list = []
 
 for i in range(len(lyric_dict)):
+    
     filtered_sentence = [] 
-    filtered_sentence = [w for w in lyric_dict[song_ID_sorted[i]] if not w in stop_words] 
+    
+    filtered_sentence = [w for w in lyric_dict_lower[song_ID_sorted[i]] if not w in stop_words] 
   
-    for w in lyric_dict[song_ID_sorted[i]]: 
+    for w in lyric_dict_lower[song_ID_sorted[i]]: 
         if w not in stop_words: 
           filtered_sentence.append(w)
     simple_lyrics_list.append(filtered_sentence)
@@ -205,6 +218,7 @@ for i in range(len(lyric_dict)):
 simple_lyrics_count = []
         
 for i in range(len(simple_lyrics_list)):
+
     x = len(set(simple_lyrics_list[i]))
     simple_lyrics_count.append(x)
 
@@ -218,6 +232,7 @@ while n<=1000:
 
 
 # CODE FOR MOOD
+    
 ## Use TextBlob's sentiment to check polarity - positive or negative.
 ## Needs to detect sentence by sentence, not by individual words -> use lines_dict
 ## We use textblob's sentiment detector (built on training set of movie reviews) -> Return a tuple of form (polarity, subjectivity ) where polarity is a float within the range [-1.0, 1.0] and subjectivity is a float within the range [0.0, 1.0] where 0.0 is very objective and 1.0 is very subjective.
@@ -248,6 +263,7 @@ for key,value in lines_dict.items():
 
 
 # CODE FOR LOVE
+    
 ## Function that takes a list of words (of a song) and outputs the total love-related songs the song contains
 def detect_love_count(words):
     #input: words is a list of all words in one song
@@ -300,5 +316,3 @@ output_list[983]
 ## Translation
 ## some txt files say just [Instrumental]
 ## love score is not counting the UNIQUE love words, but absolute count of love-related words per song. But should be reasonable, the more intense it is the more they will repeat the words.
-## Path cannot be relative 'lyric' folder. Need to incorporate argparse
-## kid-safe score is now a profanity score. Needs to be reversed [DARREN TO DO]
