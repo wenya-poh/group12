@@ -17,7 +17,7 @@ from textblob import TextBlob
 
 
 ## Change working directory to the folder CONTAINING "lyrics" here - gives list of names of each file
-path = "lyrics" ##NOTE: Prof says we will need to use an argparse thing instead of absolute path
+path = "lyrics/" ##NOTE: Prof says we will need to use an argparse thing instead of absolute path
 dirs = os.listdir(path)
 file_titles = [] # list of file titles without .txt
 file_txt_names = [] #list of tile titles with .txt
@@ -96,21 +96,23 @@ while n<=1000:
     lines_dict[song_ID_sorted[n]] = read_song_lines(path+file_txt_names[n])
     n+=1
 
-# Check which songs are not in english
-from textblob import TextBlob
-non_eng_record = {}
-for key, value in lines_dict.items():
-    if len(value[0]) >= 3:
-        x = TextBlob(value[0]).detect_language()
-        if x != 'en':
-            non_eng_record[key] = x 
-### non_eng_record dictionary is saved in non_eng_record_dict.py for backup record, because GoogleTranslate API may not always be available 
-
-## Obtain list of all indexes that are not in English
-non_eng_indexes = []
-for key,value in non_eng_record.items():
-    non_eng_indexes.append(key)
-
+# =============================================================================
+# # Check which songs are not in english
+# from textblob import TextBlob
+# non_eng_record = {}
+# for key, value in lines_dict.items():
+#     if len(value[0]) >= 3:
+#         x = TextBlob(value[0]).detect_language()
+#         if x != 'en':
+#             non_eng_record[key] = x 
+# ### non_eng_record dictionary is saved in non_eng_record_dict.py for backup record, because GoogleTranslate API may not always be available 
+# 
+# ## Obtain list of all indexes that are not in English
+# non_eng_indexes = []
+# for key,value in non_eng_record.items():
+#     non_eng_indexes.append(key)
+# 
+# =============================================================================
 # =============================================================================
 # ## translate_list iterates over a list of strings and translates them using TextBlob
 # def translate_list(list_):
@@ -178,36 +180,39 @@ for key,value in lyric_dict.items():
 
 # CODE FOR COMPLEXITY **NEEDS TO BE PUT IN FUNCTIONS**
 ##### Remove stop words
-import nltk
-from nltk.corpus import stopwords
-  
-stop_words = set(stopwords.words('english')) 
-simple_lyrics_list = []
 
-for i in range(len(lyric_dict)):
-    filtered_sentence = [] 
-    filtered_sentence = [w for w in lyric_dict[song_ID_sorted[i]] if not w in stop_words] 
-  
-    for w in lyric_dict[song_ID_sorted[i]]: 
-        if w not in stop_words: 
-          filtered_sentence.append(w)
-    simple_lyrics_list.append(filtered_sentence)
+
+def detect_complexity(lyric_dict_):
+    import nltk
+    from nltk.corpus import stopwords
+    stop_words = set(stopwords.words('english')) 
+    simple_lyrics_list = []
     
-## Obtain count of words as proxy for complexity
-simple_lyrics_count = []
+    for i in range(len(lyric_dict_)):
+        filtered_sentence = [] 
+        filtered_sentence = [w for w in lyric_dict_[song_ID_sorted[i]] if not w in stop_words] 
+      
+        for w in lyric_dict_[song_ID_sorted[i]]: 
+            if w not in stop_words: 
+              filtered_sentence.append(w)
+        simple_lyrics_list.append(filtered_sentence)
         
-for i in range(len(simple_lyrics_list)):
-    x = len(set(simple_lyrics_list[i]))
-    simple_lyrics_count.append(x)
-
-## Scale simple word count to 0-1 for complexity
-complexity_dict = {}
-n = 0
-while n<=1000:
-    complexity_dict[song_ID_sorted[n]] = scaler(max(simple_lyrics_count), min(simple_lyrics_count),simple_lyrics_count[n])
-    n +=1   
+    ## Obtain count of words as proxy for complexity
+    simple_lyrics_count = []
+            
+    for i in range(len(simple_lyrics_list)):
+        x = len(set(simple_lyrics_list[i]))
+        simple_lyrics_count.append(x)
+        
+    ## Scale simple word count to 0-1 for complexity
+    complexity_dict = {}
+    n = 0
+    while n<=1000:
+        complexity_dict[song_ID_sorted[n]] = scaler(max(simple_lyrics_count), min(simple_lyrics_count),simple_lyrics_count[n])
+        n +=1   
+    return complexity_dict
     
-
+complexity_dict = detect_complexity(lyric_dict)
 
 # CODE FOR MOOD
 ## Use TextBlob's sentiment to check polarity - positive or negative.
@@ -272,7 +277,7 @@ def extract_(titles):
     list_1 = []
     for i in titles:
         b = i.split('~')   
-        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': profanity_dict[b[0]], 'love': love_dict[b[0]], 'mood': mood_dict[b[0]], 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
+        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': kid_dict[b[0]], 'love': love_dict[b[0]], 'mood': mood_dict[b[0]], 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
         list_1.append(dict_1)
     return list_1
     
@@ -290,4 +295,3 @@ output_list[983]
 ## some txt files say just [Instrumental]
 ## love score is not counting the UNIQUE love words, but absolute count of love-related words per song. But should be reasonable, the more intense it is the more they will repeat the words.
 ## Path cannot be relative 'lyric' folder. Need to incorporate argparse
-## kid-safe score is now a profanity score. Needs to be reversed [DARREN TO DO]
