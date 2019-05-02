@@ -6,6 +6,12 @@ Created on Tue Apr  2 16:35:30 2019
 @author: wenya, darren
 """
 
+import os, sys
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+import json
+
 # HELPER FUNCTIONS
 # Function that returns the individual words for the text file input
 def read_song(txt_name):
@@ -50,6 +56,19 @@ def scaler(max_,min_,value):
     return x     
 
 
+# CODE FOR LENGTH
+def detect_length(lyric_dict_, song_ID_sorted_):
+    song_length_list = []
+    n = 0
+    while n<=1000:
+        song_length_list.append(len(lyric_dict_[song_ID_sorted_[n]]))
+    length_dict = {}
+    n = 0
+    while n<=1000:
+        length_dict[song_ID_sorted_[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict_[song_ID_sorted_[n]]))
+        n +=1
+    return length_dict
+
 
 # CODE FOR KID SAFE
 def detect_profane_count(words):
@@ -64,8 +83,7 @@ def max_min_profanity(lyric_dict_):
     all_profane_scores = []
     for key,value in lyric_dict_.items():
         all_profane_scores.append(detect_profane_count(value))
-    return(max(all_profane_scores),min(all_profane_scores))
-    
+    return(max(all_profane_scores),min(all_profane_scores)) 
 
 
 # CODE FOR COMPLEXITY
@@ -149,6 +167,7 @@ def max_min_love(lyric_dict_):
 
 # Function to create final output dictionary(extract id, artist, title) 
 def extract_(titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict):
+    ## TO DO: File titles, strip all dashes
     list_1 = []
     for i in titles:
         b = i.split('~')   
@@ -158,12 +177,7 @@ def extract_(titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict):
 
 
 
-def main(file_path):
-    import os, sys
-    from textblob import TextBlob
-    import nltk
-    from nltk.corpus import stopwords
-    
+def main(file_path):    
     #1 Read files in folder. To enter the path of the folder containing the txt files
     path = str(file_path)
     
@@ -187,27 +201,18 @@ def main(file_path):
     lyric_dict = {}
     n=0
     while n<=1000:
-        lyric_dict[song_ID_sorted[n]] = read_song(path+file_txt_names[n])
+        lyric_dict[song_ID_sorted[n]] = read_song(path+'/'+file_txt_names[n])
         n+=1
     
     #3 Create the main line dictionary with sentences. format is id: [list of lyric sentences]
     lines_dict = {}
     n=0
     while n<=1000:
-        lines_dict[song_ID_sorted[n]] = read_song_lines(path+file_txt_names[n])
+        lines_dict[song_ID_sorted[n]] = read_song_lines(path+'/'+file_txt_names[n])
         n+=1
         
     #4 Find Song Length - create list and dictionrary of song lengths to find max and min
-    song_length_list = []
-    n = 0
-    while n<=1000:
-        song_length_list.append(len(lyric_dict[song_ID_sorted[n]]))
-        n+=1
-    length_dict = {}
-    n = 0
-    while n<=1000:
-        length_dict[song_ID_sorted[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict[song_ID_sorted[n]]))
-        n +=1
+    length_dict = detect_length(lyric_dict,song_ID_sorted)
     
     #5 KID SAFE Scoring
     maxmin_profanity_score = max_min_profanity(lyric_dict)
@@ -231,29 +236,32 @@ def main(file_path):
     for key,value in lyric_dict.items():
         love_dict[key] = scaler(maxmin_love_score[0],maxmin_love_score[1],detect_love_count(value))
     
-    #9 Generate output
+    #9 Generate output    
     output_list = extract_(file_titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict)
+    output_char = {"characterizations": output_list}
+    output_json = json.dumps(output_char,indent=4)
     
-    return output_list
+    print(output_json)
+    return output_json
+
+    
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser('Classify songs')
+    parser.add_argument('path',help='<>')
+    args = parser.parse_args()
+    main(args.path)
 
 
-#print to screen as as json serialized object -> convert from python dict, json dump
-result = main("lyrics/")
 
-
-# output_list[983] 
-
-
-## Notes
-# Lyric filenames go from 000 to 1000
-# .splitlines() to get each line in a nested list
+#main("/Users/wenya/Dropbox/Columbia University/Spring 2019/IEOR4501 Tools for Analytics/Project/lyrics")
+# run this in the command line: python Documents/GitHub/group12/main.py Documents/GitHub/group12/Lyrics or python Documents/GitHub/group12/main.py Documents/Test_Files/Lyrics
 
 # Outstanding issues
 ## Translation
-## some txt files say just [Instrumental]
-## love score is not counting the UNIQUE love words, but absolute count of love-related words per song. But should be reasonable, the more intense it is the more they will repeat the words.
-## Path cannot be relative 'lyric' folder. Need to incorporate argparse
-
+## some txt files say just [Instrumental] -> forget it
+## Test script
+## Remove dashes for song titles and artist titles -> use regex
 
 
 # =============================================================================
