@@ -89,8 +89,28 @@ class TestScaler(unittest.TestCase):
 suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestScaler)
 # Run each test in suite
 unittest.TextTestRunner().run(suite)                       
+
+#test song length
+
+
+class TestSong_length(unittest.TestCase):
+
+    main.main(r"\Users\dlcgx\OneDrive\Desktop\Tools for Analytics\Project\Lyrics")
+    def test_type(self): 
+        self.assertEqual(type(read_song_lines(r"000~Jerry-Harrison~No-More-Reruns.txt")), list)
+
+    def test_length(self):
+        self.assertEqual(len(read_song_lines(r"000~Jerry-Harrison~No-More-Reruns.txt")),71)
         
-        
+    def test_lower(self):
+        for i in read_song_lines(r"000~Jerry-Harrison~No-More-Reruns.txt"):
+            self.assertEqual(i, i.lower())
+
+
+# Get tests as a test suite
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestSong_lines)
+# Run each test in suite
+unittest.TextTestRunner().run(suite)       
         
         
         
