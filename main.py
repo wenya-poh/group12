@@ -62,6 +62,7 @@ def detect_length(lyric_dict_, song_ID_sorted_):
     n = 0
     while n<=1000:
         song_length_list.append(len(lyric_dict_[song_ID_sorted_[n]]))
+        n+=1
     length_dict = {}
     n = 0
     while n<=1000:
