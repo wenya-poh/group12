@@ -86,6 +86,16 @@ def max_min_profanity(lyric_dict_):
         all_profane_scores.append(detect_profane_count(value))
     return(max(all_profane_scores),min(all_profane_scores)) 
 
+def kid(lyric_dict_):
+    # input: lyric_dict, dictionary of songs where each line is a string in a list
+    # generate dictionary of scores for love
+    maxmin_profanity_score = max_min_profanity(lyric_dict_)
+    kid_dict = {}
+    for key,value in lyric_dict_.items():
+        ## Scale simple word count to 0-1 for kid-friendliness, reverse the scalar.
+        kid_dict[key] = 1-scaler(maxmin_profanity_score[0],maxmin_profanity_score[1],detect_profane_count(value))
+    return kid_dict
+
 
 # CODE FOR COMPLEXITY
 def detect_complexity(lyric_dict_,song_ID_sorted):
@@ -143,6 +153,15 @@ def max_min_mood(lines_dict_):
         all_mode_scores.append(detect_song_mood(value))
     return(max(all_mode_scores),min(all_mode_scores))
 
+def mood(lines_dict_):
+    # input: lines_dict, dictionary of songs where each line is a string in a list
+    # generate dictionary of scores for mood
+    maxmin_mood_score = max_min_mood(lines_dict_)
+    mood_dict = {}
+    for key,value in lines_dict_.items():
+        mood_dict[key] = scaler(maxmin_mood_score[0],maxmin_mood_score[1],detect_song_mood(value))
+    return mood_dict
+
 
 # CODE FOR LOVE
 ## Function that takes a list of words (of a song) and outputs the total love-related songs the song contains
@@ -164,6 +183,16 @@ def max_min_love(lyric_dict_):
     for key,value in lyric_dict_.items():
         all_love_scores.append(detect_love_count(value))
     return(max(all_love_scores),min(all_love_scores))
+
+def love(lyric_dict_):
+    # input: lyric_dict, dictionary of songs where each line is a string in a list
+    # generate dictionary of scores for love
+    maxmin_love_score = max_min_love(lyric_dict_)
+    love_dict = {}
+    for key,value in lyric_dict_.items():
+        love_dict[key] = scaler(maxmin_love_score[0],maxmin_love_score[1],detect_love_count(value))
+    return love_dict
+
 
 
 # Function to create final output dictionary(extract id, artist, title) 
@@ -216,35 +245,28 @@ def main(file_path):
     length_dict = detect_length(lyric_dict,song_ID_sorted)
     
     #5 KID SAFE Scoring
-    maxmin_profanity_score = max_min_profanity(lyric_dict)
-    kid_dict = {}
-    for key,value in lyric_dict.items():
-        ## Scale simple word count to 0-1 for kid-friendliness, reverse the scalar.
-        kid_dict[key] = 1-scaler(maxmin_profanity_score[0],maxmin_profanity_score[1],detect_profane_count(value))
-
+    kid_dict = kid(lyric_dict)
+    
     #6 COMPLEXITY Scoring
     complexity_dict = detect_complexity(lyric_dict,song_ID_sorted)
     
     #7 MOOD Scoring
-    maxmin_mood_score = max_min_mood(lines_dict)
-    mood_dict = {}
-    for key,value in lines_dict.items():
-        mood_dict[key] = scaler(maxmin_mood_score[0],maxmin_mood_score[1],detect_song_mood(value))
-
+    mood_dict = mood(lines_dict)
+    
     #8 LOVE Scoring
-    maxmin_love_score = max_min_love(lyric_dict)
-    love_dict = {}
-    for key,value in lyric_dict.items():
-        love_dict[key] = scaler(maxmin_love_score[0],maxmin_love_score[1],detect_love_count(value))
+    love_dict = love(lyric_dict)
     
     #9 Generate output    
     output_list = extract_(file_titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict)
     output_char = {"characterizations": output_list}
     output_json = json.dumps(output_char,indent=4)
     
-    print(output_json)
-    return output_json
+    #10 Final json outout
+    #print(output_json)
+    #return output_json
+    return output_char #temp for checking result
 
+result = main('Lyrics')
     
 if __name__ == '__main__':
     import argparse
@@ -252,7 +274,6 @@ if __name__ == '__main__':
     parser.add_argument('path',help='<>')
     args = parser.parse_args()
     main(args.path)
-
 
 
 #main("/Users/wenya/Dropbox/Columbia University/Spring 2019/IEOR4501 Tools for Analytics/Project/lyrics")
