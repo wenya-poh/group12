@@ -62,18 +62,37 @@ def scaler(max_,min_,value):
 
 
 # CODE FOR LENGTH
-def detect_length(lyric_dict_, song_ID_sorted_):
-    song_length_list = []
-    n = 0
-    while n<=1000:
-        song_length_list.append(len(lyric_dict_[song_ID_sorted_[n]]))
-        n+=1
+    
+    
+def detect_length_count(words):
+    return len(words)
+
+def max_min_length(lyric_dict_):
+    all_length = []
+    for key,value in lyric_dict_.items():
+        all_length.append(detect_length_count(value))
+    return(max(all_length),min(all_length)) 
+
+def length(lyric_dict_):
+    maxmin_length_score = max_min_length(lyric_dict_)    
     length_dict = {}
-    n = 0
-    while n<=1000:
-        length_dict[song_ID_sorted_[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict_[song_ID_sorted_[n]]))
-        n +=1
+    for key,value in lyric_dict_.items():
+        kid_dict[key] = scaler(maxmin_length_score[0],maxmin_length_score[1],detect_length_count(value))
     return length_dict
+
+    
+#def detect_length(lyric_dict_, song_ID_sorted_):
+#    song_length_list = []
+#    n = 0
+#    while n<=1000:
+#        song_length_list.append(len(lyric_dict_[song_ID_sorted_[n]]))
+#        n+=1
+#    length_dict = {}
+#    n = 0
+#    while n<=1000:
+#        length_dict[song_ID_sorted_[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict_[song_ID_sorted_[n]]))
+#        n +=1
+#    return length_dict
 
 
 # CODE FOR KID SAFE
