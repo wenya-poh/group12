@@ -12,6 +12,11 @@ import nltk
 from nltk.corpus import stopwords
 import json
 
+# For translation: 
+from translated import non_eng_dict #dictionary of indexes of all non-english songs and the language they are in
+from translated import translated_master_lines #dictionary of non-english songs in lines format
+from translated import translated_master_words #dictionary of non-english songs in word format
+
 # HELPER FUNCTIONS
 # Function that returns the individual words for the text file input
 def read_song(txt_name):
@@ -192,19 +197,17 @@ def love(lyric_dict_):
     for key,value in lyric_dict_.items():
         love_dict[key] = scaler(maxmin_love_score[0],maxmin_love_score[1],detect_love_count(value))
     return love_dict
-
+    
 
 
 # Function to create final output dictionary(extract id, artist, title) 
 def extract_(titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict):
-    ## TO DO: File titles, strip all dashes
     list_1 = []
     for i in titles:
         b = i.split('~')   
-        dict_1 = {"id" : b[0], "artist" : b[1], "title" : b[2], 'kid_safe': kid_dict[b[0]], 'love': love_dict[b[0]], 'mood': mood_dict[b[0]], 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
+        dict_1 = {"id" : b[0], "artist" : b[1].replace('-',' '), "title" : b[2].replace('-',' '), 'kid_safe': kid_dict[b[0]], 'love': love_dict[b[0]], 'mood': mood_dict[b[0]], 'length': length_dict[b[0]], 'complexity': complexity_dict[b[0]]}
         list_1.append(dict_1)
     return list_1
-
 
 
 def main(file_path):    
@@ -225,7 +228,7 @@ def main(file_path):
     for i in range(len(file_titles)):
         file_titles[i] = file_titles[i].replace(".txt","")
     
-    #2 Create the main lyric dictionary with individual words. format is id: [list of song words]
+    #2a Create the main lyric dictionary with individual words. format is id: [list of song words]
     song_ID_sorted = song_ID_list(file_titles)
     song_ID_sorted.sort()
     lyric_dict = {}
@@ -234,14 +237,24 @@ def main(file_path):
         lyric_dict[song_ID_sorted[n]] = read_song(path+'/'+file_txt_names[n])
         n+=1
     
-    #3 Create the main line dictionary with sentences. format is id: [list of lyric sentences]
+    #2b Handle translation for non-engish songs in lyric_dict to have all songs translated to english. translated_master_words is a dictionary imported from translated.py
+    for key,value in lyric_dict.items():
+        if key in non_eng_dict:
+            lyric_dict[key] = translated_master_words[key]
+    
+    #3a Create the main line dictionary with sentences. format is id: [list of lyric sentences]
     lines_dict = {}
     n=0
     while n<=1000:
         lines_dict[song_ID_sorted[n]] = read_song_lines(path+'/'+file_txt_names[n])
         n+=1
-        
-    #4 Find Song Length - create list and dictionrary of song lengths to find max and min
+    
+    #3b Handle translation for non-engish songs in lines_dict to have all songs translated to english. translated_master_lines is a dictionary imported from translated.py
+    for key,value in lines_dict.items():
+        if key in non_eng_dict:
+            lines_dict[key] = translated_master_lines[key]
+      
+    #4 LENGTH Scoring - create list and dictionrary of song lengths to find max and min
     length_dict = detect_length(lyric_dict,song_ID_sorted)
     
     #5 KID SAFE Scoring
@@ -261,13 +274,16 @@ def main(file_path):
     output_char = {"characterizations": output_list}
     output_json = json.dumps(output_char,indent=4)
     
-    #10 Final json outout
+    #10 Final json outout - To uncomment just before submission
     #print(output_json)
     #return output_json
-    return output_char #temp for checking result
 
-result = main('Lyrics')
-    
+    # Test output - to comment out for submission
+    return output_char
+
+result = main('Lyrics') #to comment out for submission
+
+# don't run these lines when testing in spyder, leave for submission   
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser('Classify songs')
@@ -275,48 +291,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args.path)
 
-
-#main("/Users/wenya/Dropbox/Columbia University/Spring 2019/IEOR4501 Tools for Analytics/Project/lyrics")
-# run this in the command line: python Documents/GitHub/group12/main.py Documents/GitHub/group12/Lyrics or python Documents/GitHub/group12/main.py Documents/Test_Files/Lyrics
-
-# Outstanding issues
-## Translation
-## some txt files say just [Instrumental] -> forget it
-## Test script
-## Remove dashes for song titles and artist titles -> use regex
-
-
-# =============================================================================
-# # Check which songs are not in english
-# from textblob import TextBlob
-# non_eng_record = {}
-# for key, value in lines_dict.items():
-#     if len(value[0]) >= 3:
-#         x = TextBlob(value[0]).detect_language()
-#         if x != 'en':
-#             non_eng_record[key] = x 
-# ### non_eng_record dictionary is saved in non_eng_record_dict.py for backup record, because GoogleTranslate API may not always be available 
-# 
-# ## Obtain list of all indexes that are not in English
-# non_eng_indexes = []
-# for key,value in non_eng_record.items():
-#     non_eng_indexes.append(key)
-# 
-# =============================================================================
-# =============================================================================
-# ## translate_list iterates over a list of strings and translates them using TextBlob
-# def translate_list(list_):
-#     from textblob import TextBlob
-#     translated = []
-#     for i in list_:
-#         t = TextBlob(str(i)).translate(to='en')
-#         translated.append(str(t))
-#     return translated
-#     
-# lines_dict_trans = lines_dict
-# for index in non_eng_indexes:
-#     lines_dict_trans[index] = translate_list(lines_dict[index])
-# ###WENYA: WORK INPROGRESS. API stops working after the first paragraph of the first song is translated, see the non_eng_record_dict.py
-# ###gives "Translation API returned and empty response." because there's too many requests
-# 
-# =============================================================================

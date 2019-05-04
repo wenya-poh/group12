@@ -1,0 +1,4 @@
+Please install these packages:
+
+nltk
+textblob
