@@ -303,10 +303,10 @@ def main(file_path):
 result = main('Lyrics') #to comment out for submission
 
 # don't run these lines when testing in spyder, leave for submission   
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser('Classify songs')
-    parser.add_argument('path',help='<>')
-    args = parser.parse_args()
-    main(args.path)
+#if __name__ == '__main__':
+#    import argparse
+#    parser = argparse.ArgumentParser('Classify songs')
+#    parser.add_argument('path',help='<>')
+#    args = parser.parse_args()
+#    main(args.path)
 
