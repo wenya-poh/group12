@@ -77,22 +77,9 @@ def length(lyric_dict_):
     maxmin_length_score = max_min_length(lyric_dict_)    
     length_dict = {}
     for key,value in lyric_dict_.items():
-        kid_dict[key] = scaler(maxmin_length_score[0],maxmin_length_score[1],detect_length_count(value))
+        length_dict[key] = scaler(maxmin_length_score[0],maxmin_length_score[1],detect_length_count(value))
     return length_dict
 
-    
-#def detect_length(lyric_dict_, song_ID_sorted_):
-#    song_length_list = []
-#    n = 0
-#    while n<=1000:
-#        song_length_list.append(len(lyric_dict_[song_ID_sorted_[n]]))
-#        n+=1
-#    length_dict = {}
-#    n = 0
-#    while n<=1000:
-#        length_dict[song_ID_sorted_[n]] = scaler(max(song_length_list), min(song_length_list),len(lyric_dict_[song_ID_sorted_[n]]))
-#        n +=1
-#    return length_dict
 
 
 # CODE FOR KID SAFE
@@ -122,37 +109,31 @@ def kid(lyric_dict_):
 
 
 # CODE FOR COMPLEXITY
-def detect_complexity(lyric_dict_,song_ID_sorted):
+
+def detect_complexity_count(words):
     import nltk
     from nltk.corpus import stopwords
     # Remove stop words
-    stop_words = set(stopwords.words('english')) 
-    simple_lyrics_list = []
+    stop_words = set(stopwords.words('english'))     
+
+    filtered_sentence = [] 
+    filtered_sentence = [w for w in words if not w in stop_words] 
     
-    for i in range(len(lyric_dict_)):
-        filtered_sentence = [] 
-        filtered_sentence = [w for w in lyric_dict_[song_ID_sorted[i]] if not w in stop_words] 
-      
-        for w in lyric_dict_[song_ID_sorted[i]]: 
-            if w not in stop_words: 
-              filtered_sentence.append(w)
-        simple_lyrics_list.append(filtered_sentence)
-        
-    ## Obtain count of words as proxy for complexity
-    simple_lyrics_count = []
-            
-    for i in range(len(simple_lyrics_list)):
-        x = len(set(simple_lyrics_list[i]))
-        simple_lyrics_count.append(x)
-        
-    ## Scale simple word count to 0-1 for complexity
-    complexity_dict = {}
-    n = 0
-    while n<=1000:
-        complexity_dict[song_ID_sorted[n]] = scaler(max(simple_lyrics_count), min(simple_lyrics_count),simple_lyrics_count[n])
-        n +=1   
-    return complexity_dict
-    
+    return len(filtered_sentence)
+
+def max_min_complexity(lyric_dict_):
+    all_complexity_scores = []
+    for key,value in lyric_dict_.items():
+        all_complexity_scores.append(detect_complexity_count(value))
+    return(max(all_complexity_scores),min(all_complexity_scores)) 
+
+def complexity(lyric_dict_):
+    maxmin_complex_score = max_min_complexity(lyric_dict_)    
+    complex_dict = {}
+    for key,value in lyric_dict_.items():
+        complex_dict[key] = scaler(maxmin_complex_score[0],maxmin_complex_score[1],detect_complexity_count(value))
+    return complex_dict
+
 
 # CODE FOR MOOD
 ## Use TextBlob's sentiment to check polarity - positive or negative.
@@ -229,7 +210,7 @@ def extract_(titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict):
     return list_1
 
 
-def main(file_path):    
+def main_(file_path):    
     #1 Read files in folder. To enter the path of the folder containing the txt files
     path = str(file_path)
     
@@ -274,13 +255,13 @@ def main(file_path):
             lines_dict[key] = translated_master_lines[key]
       
     #4 LENGTH Scoring - create list and dictionrary of song lengths to find max and min
-    length_dict = detect_length(lyric_dict,song_ID_sorted)
+    length_dict = length(lyric_dict)
     
     #5 KID SAFE Scoring
     kid_dict = kid(lyric_dict)
     
     #6 COMPLEXITY Scoring
-    complexity_dict = detect_complexity(lyric_dict,song_ID_sorted)
+    complexity_dict = complexity(lyric_dict)
     
     #7 MOOD Scoring
     mood_dict = mood(lines_dict)
@@ -300,7 +281,7 @@ def main(file_path):
     # Test output - to comment out for submission
     return output_char
 
-result = main('Lyrics') #to comment out for submission
+result = main_('Lyrics') #to comment out for submission
 
 # don't run these lines when testing in spyder, leave for submission   
 #if __name__ == '__main__':
