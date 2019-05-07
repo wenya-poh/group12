@@ -210,7 +210,8 @@ def extract_(titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict):
     return list_1
 
 
-def main_(file_path):    
+# Main runs the commands to read the files and call helper functions to calculate the results and print output as json
+def main(file_path):    
     #1 Read files in folder. To enter the path of the folder containing the txt files
     path = str(file_path)
     
@@ -272,22 +273,21 @@ def main_(file_path):
     #9 Generate output    
     output_list = extract_(file_titles,kid_dict,love_dict,mood_dict,length_dict,complexity_dict)
     output_char = {"characterizations": output_list}
-    output_json = json.dumps(output_char,indent=4)
+    output_json = json.dumps(output_char,indent=4,ensure_ascii=False)
     
     #10 Final json outout - To uncomment just before submission
-    #print(output_json)
-    #return output_json
+    print(output_json)
+    return output_json
 
-    # Test output - to comment out for submission
-    return output_char
+    # Test output
+    # return output_char
 
-result = main_('Lyrics') #to comment out for submission
+#result = main_('Lyrics') #to comment out for submission - was for testing
 
-# don't run these lines when testing in spyder, leave for submission   
-#if __name__ == '__main__':
-#    import argparse
-#    parser = argparse.ArgumentParser('Classify songs')
-#    parser.add_argument('path',help='<>')
-#    args = parser.parse_args()
-#    main(args.path)
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser('Classify songs')
+    parser.add_argument('path',help='<>')
+    args = parser.parse_args()
+    main(args.path)
 
