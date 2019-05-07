@@ -31,7 +31,7 @@ for file in dirs:
 for i in range(len(file_titles)):
     file_titles[i] = file_titles[i].replace(".txt","")
     
-song_ID_sorted = song_ID_list(file_titles)
+song_ID_sorted = main.song_ID_list(file_titles)
 song_ID_sorted.sort()
 lyric_dict = {}
 for n in [0,156,641,541,961,1000]:
